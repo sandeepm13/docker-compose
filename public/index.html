@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Notes</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,560;6..72,650&family=Source+Sans+3:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --ink: #17211c;
+        --field: #1c3330;
+        --paper: #f7fbff;
+        --line: #d3e1ee;
+        --muted: #5c6b66;
+        --mark: #c83c24;
+        --ok: #1f6b45;
+        --focus: #1d4e89;
+      }
+
+      * { box-sizing: border-box; }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        color: var(--ink);
+        background:
+          linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 180px),
+          var(--field);
+        font-family: "Source Sans 3", "Segoe UI", sans-serif;
+        font-size: 17px;
+        line-height: 1.45;
+      }
+
+      main {
+        width: min(1080px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 36px 0 64px;
+      }
+
+      header h1 {
+        margin: 0;
+        color: #f4f7f2;
+        font-family: Newsreader, Georgia, serif;
+        font-size: clamp(42px, 6vw, 68px);
+        font-weight: 650;
+        letter-spacing: -0.03em;
+        line-height: 0.95;
+      }
+
+      header p {
+        max-width: 36rem;
+        margin: 10px 0 28px;
+        color: #d5e0da;
+      }
+
+      .desk {
+        display: grid;
+        grid-template-columns: minmax(260px, 340px) 1fr;
+        gap: 22px;
+        align-items: start;
+      }
+
+      section {
+        background: var(--paper);
+        padding: 22px;
+      }
+
+      h2 {
+        margin: 0 0 14px;
+        font-family: Newsreader, Georgia, serif;
+        font-size: 28px;
+        font-weight: 560;
+      }
+
+      form {
+        display: grid;
+        gap: 10px;
+      }
+
+      label {
+        display: grid;
+        gap: 4px;
+        font-weight: 600;
+      }
+
+      input[type="text"],
+      input[type="email"],
+      select,
+      textarea {
+        width: 100%;
+        border: 1px solid #b7c6d4;
+        border-radius: 0;
+        background: white;
+        color: var(--ink);
+        font: inherit;
+        padding: 8px 10px;
+      }
+
+      textarea {
+        min-height: 148px;
+        resize: vertical;
+        line-height: 28px;
+        padding-top: 4px;
+        background-color: #f7fbff;
+        background-image: repeating-linear-gradient(
+          to bottom,
+          transparent 0,
+          transparent 27px,
+          var(--line) 28px
+        );
+      }
+
+      .check {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+      }
+
+      button {
+        justify-self: start;
+        border: 0;
+        background: var(--mark);
+        color: white;
+        font: inherit;
+        font-weight: 600;
+        padding: 8px 14px;
+        cursor: pointer;
+      }
+
+      button:disabled,
+      select:disabled {
+        background: #d5dbe0;
+        color: #5c6b66;
+        cursor: not-allowed;
+      }
+
+      button:focus-visible,
+      input:focus-visible,
+      select:focus-visible,
+      textarea:focus-visible {
+        outline: 3px solid var(--focus);
+        outline-offset: 2px;
+      }
+
+      .message {
+        min-height: 1.4em;
+        margin: 8px 0 0;
+        color: var(--muted);
+      }
+
+      .message.error { color: var(--mark); }
+      .message.ok { color: var(--ok); }
+
+      ul {
+        list-style: none;
+        margin: 22px 0 0;
+        padding: 0;
+      }
+
+      li {
+        padding: 12px 0;
+        border-top: 1px solid var(--line);
+      }
+
+      li p { margin: 4px 0 0; }
+
+      .meta {
+        color: var(--muted);
+        font-size: 15px;
+      }
+
+      .row {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: baseline;
+      }
+
+      .quiet {
+        border: 0;
+        background: transparent;
+        color: var(--muted);
+        padding: 0;
+        text-decoration: underline;
+        font-size: 15px;
+      }
+
+      @media (max-width: 800px) {
+        .desk { grid-template-columns: 1fr; }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        * { scroll-behavior: auto; }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>Notes</h1>
+        <p>Add a person first. Then write a note and choose who it belongs to.</p>
+      </header>
+      <div class="desk">
+        <section>
+          <h2>People</h2>
+          <form id="user-form">
+            <label>
+              Name
+              <input id="name" name="name" type="text" required autocomplete="name" />
+            </label>
+            <label>
+              Email
+              <input id="email" name="email" type="email" required autocomplete="email" />
+            </label>
+            <button type="submit">Add person</button>
+            <p id="user-message" class="message" role="status"></p>
+          </form>
+          <ul id="users"></ul>
+        </section>
+        <section>
+          <h2>Write a note</h2>
+          <form id="note-form">
+            <label>
+              Title
+              <input id="title" name="title" type="text" required />
+            </label>
+            <label>
+              Note
+              <textarea id="content" name="content" required></textarea>
+            </label>
+            <label>
+              Person
+              <select id="authorId" name="authorId"></select>
+            </label>
+            <label class="check">
+              <input id="published" name="published" type="checkbox" />
+              Show this note as published
+            </label>
+            <button type="submit">Save note</button>
+            <p id="note-message" class="message" role="status"></p>
+          </form>
+          <ul id="notes"></ul>
+        </section>
+      </div>
+    </main>
+    <script>
+      const usersEl = document.querySelector("#users");
+      const notesEl = document.querySelector("#notes");
+      const authorEl = document.querySelector("#authorId");
+      const saveNoteButton = document.querySelector("#note-form button[type='submit']");
+      const userMessage = document.querySelector("#user-message");
+      const noteMessage = document.querySelector("#note-message");
+
+      function setMessage(el, text, kind) {
+        el.textContent = text;
+        el.className = "message" + (kind ? " " + kind : "");
+      }
+
+      async function readError(response) {
+        const body = await response.json().catch(() => ({}));
+        return body.error || "Request failed";
+      }
+
+      function renderUsers(users) {
+        usersEl.replaceChildren();
+        authorEl.replaceChildren();
+        if (users.length === 0) {
+          authorEl.disabled = true;
+          saveNoteButton.disabled = true;
+          const item = document.createElement("li");
+          item.textContent = "No people yet.";
+          usersEl.append(item);
+          const option = document.createElement("option");
+          option.value = "";
+          option.textContent = "Add a person first";
+          authorEl.append(option);
+          setMessage(noteMessage, "Add a person before saving a note.", "error");
+          return;
+        }
+
+        authorEl.disabled = false;
+        saveNoteButton.disabled = false;
+        if (noteMessage.textContent === "Add a person before saving a note.") {
+          setMessage(noteMessage, "");
+        }
+
+        for (const user of users) {
+          const item = document.createElement("li");
+          const name = document.createElement("strong");
+          name.textContent = user.name;
+          const meta = document.createElement("p");
+          meta.className = "meta";
+          const count = user._count?.notes ?? 0;
+          meta.textContent = user.email + " · " + count + (count === 1 ? " note" : " notes");
+          item.append(name, meta);
+          usersEl.append(item);
+
+          const option = document.createElement("option");
+          option.value = user.id;
+          option.textContent = user.name;
+          authorEl.append(option);
+        }
+      }
+
+      function renderNotes(notes) {
+        notesEl.replaceChildren();
+        if (notes.length === 0) {
+          const item = document.createElement("li");
+          item.textContent = "No notes yet.";
+          notesEl.append(item);
+          return;
+        }
+
+        for (const note of notes) {
+          const item = document.createElement("li");
+          const row = document.createElement("div");
+          row.className = "row";
+          const title = document.createElement("strong");
+          title.textContent = note.title;
+          const remove = document.createElement("button");
+          remove.type = "button";
+          remove.className = "quiet";
+          remove.textContent = "Delete";
+          remove.addEventListener("click", () => deleteNote(note.id));
+          row.append(title, remove);
+
+          const body = document.createElement("p");
+          body.textContent = note.content;
+          const meta = document.createElement("p");
+          meta.className = "meta";
+          meta.textContent =
+            (note.author?.name || "Unknown") +
+            (note.published ? " · published" : " · draft");
+          item.append(row, body, meta);
+          notesEl.append(item);
+        }
+      }
+
+      async function load() {
+        const [usersResponse, notesResponse] = await Promise.all([
+          fetch("/users"),
+          fetch("/notes"),
+        ]);
+        if (!usersResponse.ok || !notesResponse.ok) {
+          setMessage(userMessage, "Could not load the lists. Check that Postgres is running.", "error");
+          return;
+        }
+        renderUsers(await usersResponse.json());
+        renderNotes(await notesResponse.json());
+      }
+
+      document.querySelector("#user-form").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const response = await fetch("/users", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: document.querySelector("#name").value,
+            email: document.querySelector("#email").value,
+          }),
+        });
+        if (!response.ok) {
+          setMessage(userMessage, await readError(response), "error");
+          return;
+        }
+        event.target.reset();
+        setMessage(userMessage, "Person added.", "ok");
+        await load();
+      });
+
+      document.querySelector("#note-form").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const authorId = authorEl.value;
+        if (!authorId) {
+          setMessage(noteMessage, "Add a person before saving a note.", "error");
+          return;
+        }
+        const response = await fetch("/notes", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            title: document.querySelector("#title").value,
+            content: document.querySelector("#content").value,
+            authorId,
+            published: document.querySelector("#published").checked,
+          }),
+        });
+        if (!response.ok) {
+          setMessage(noteMessage, await readError(response), "error");
+          return;
+        }
+        event.target.reset();
+        setMessage(noteMessage, "Note saved.", "ok");
+        await load();
+      });
+
+      async function deleteNote(id) {
+        const response = await fetch("/notes/" + id, { method: "DELETE" });
+        if (!response.ok && response.status !== 204) {
+          setMessage(noteMessage, await readError(response), "error");
+          return;
+        }
+        setMessage(noteMessage, "Note deleted.", "ok");
+        await load();
+      }
+
+      load().catch(() => {
+        setMessage(userMessage, "Could not reach the API.", "error");
+      });
+    </script>
+  </body>
+</html>
